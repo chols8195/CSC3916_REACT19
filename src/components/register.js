@@ -7,6 +7,7 @@ function Register() {
     const [details, setDetails] = useState({
         name: '',
         username: '',
+        email: '',
         password: ''
     });
 
@@ -26,17 +27,21 @@ function Register() {
     return (
         <div className="register-container">
             <Form className='register-form bg-dark text-light p-4 rounded'>
-                <Form.Group controlId="name">
+                <Form.Group controlId="name" className='mb-3'>
                     <Form.Label>Name</Form.Label>
                     <Form.Control onChange={updateDetails} value={details.name} type="text" placeholder="Name" />
                 </Form.Group>
 
-                <Form.Group controlId="username">
-                    <Form.Label>Email</Form.Label>
+                <Form.Group controlId="username" className='mb-3'>
+                    <Form.Label>Username</Form.Label>
                     <Form.Control onChange={updateDetails} value={details.username} autoComplete="username" type="text" placeholder="Enter username" />
                 </Form.Group>
 
-                <Form.Group controlId="password">
+                <Form.Group controlId="email" className='mb-3'>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control onChange={updateDetails} value={details.email} autoComplete="email" type="email" placeholder="Enter email" />
+                </Form.Group>
+                <Form.Group controlId="password" className='mb-3'>
                     <Form.Label>Password</Form.Label>
                     <Form.Control onChange={updateDetails} value={details.password} autoComplete="current-password" type="password" placeholder="Password" />
                 </Form.Group>

@@ -104,3 +104,25 @@ export function submitReview(reviewData) {
         }).catch((e) => console.log(e));
     }
 }
+
+export function searchMovies(query) {
+    return dispatch => {
+        return fetch(`${env.REACT_APP_API_URL}/search`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            },
+            body: JSON.stringify({ query }),
+            mode: 'cors'
+        }).then((response) => {
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            return response.json();
+        }).then((res) => {
+            dispatch(moviesFetched(res.movies));
+        }).catch((e) => console.log(e));
+    }
+}

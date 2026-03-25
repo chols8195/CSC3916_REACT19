@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMovies, setMovie } from "../actions/movieActions";
+import { fetchMovies, setMovie, searchMovies } from "../actions/movieActions";
 import { Link, useNavigate } from 'react-router-dom';
-import { BsStarFill, BsChevronLeft, BsChevronRight } from 'react-icons/bs';
+import { BsStarFill, BsChevronLeft, BsChevronRight, BsSearch, BsX } from 'react-icons/bs';
 
 function MovieList() {
     const dispatch = useDispatch();
@@ -11,12 +11,14 @@ function MovieList() {
     const loggedIn = useSelector(state => state.auth.loggedIn);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('now_playing');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
-        if (loggedIn) {
+        if (loggedIn && !isSearching) {
             dispatch(fetchMovies(activeTab));
         }
-    }, [dispatch, activeTab, loggedIn]);
+    }, [dispatch, activeTab, loggedIn, isSearching]);
 
     useEffect(() => {
         if (movies && movies.length > 0) {
@@ -35,6 +37,8 @@ function MovieList() {
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setFeaturedIndex(0);
+        setIsSearching(false);
+        setSearchQuery('');
     };
 
     const nextFeatured = () => {
@@ -47,6 +51,20 @@ function MovieList() {
         if (movies && movies.length > 0) {
             setFeaturedIndex((prev) => (prev - 1 + Math.min(movies.length, 5)) % Math.min(movies.length, 5));
         }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            setIsSearching(true);
+            dispatch(searchMovies(searchQuery));
+        }
+    };
+
+    const clearSearch = () => {
+        setSearchQuery('');
+        setIsSearching(false);
+        dispatch(fetchMovies(activeTab));
     };
 
     // If not logged in, show login prompt
@@ -71,9 +89,38 @@ function MovieList() {
 
     if (!movies || movies.length === 0) {
         return (
-            <div className="loading">
-                <div className="loading-spinner"></div>
-                <span>Loading movies...</span>
+            <div>
+                {/* Search Bar */}
+                <div className="search-section">
+                    <form onSubmit={handleSearch} className="search-form">
+                        <div className="search-input-wrapper">
+                            <BsSearch className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search movies, actors, genres..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="search-input"
+                            />
+                            {searchQuery && (
+                                <button type="button" className="search-clear" onClick={clearSearch}>
+                                    <BsX />
+                                </button>
+                            )}
+                        </div>
+                        <button type="submit" className="search-btn">Search</button>
+                    </form>
+                </div>
+
+                <div className="loading">
+                    <div className="loading-spinner"></div>
+                    <span>{isSearching ? 'No movies found' : 'Loading movies...'}</span>
+                    {isSearching && (
+                        <button className="btn-back" onClick={clearSearch} style={{ marginTop: '20px' }}>
+                            Back to Movies
+                        </button>
+                    )}
+                </div>
             </div>
         );
     }
@@ -83,24 +130,48 @@ function MovieList() {
 
     return (
         <div>
-            {/* Tab Navigation */}
-            <div className="tab-nav">
-                <button 
-                    className={`tab-btn ${activeTab === 'now_playing' ? 'active' : ''}`}
-                    onClick={() => handleTabChange('now_playing')}
-                >
-                    Now Playing
-                </button>
-                <button 
-                    className={`tab-btn ${activeTab === 'coming_soon' ? 'active' : ''}`}
-                    onClick={() => handleTabChange('coming_soon')}
-                >
-                    Coming Soon
-                </button>
+            {/* Search Bar */}
+            <div className="search-section">
+                <form onSubmit={handleSearch} className="search-form">
+                    <div className="search-input-wrapper">
+                        <BsSearch className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Search movies, actors, genres..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="search-input"
+                        />
+                        {searchQuery && (
+                            <button type="button" className="search-clear" onClick={clearSearch}>
+                                <BsX />
+                            </button>
+                        )}
+                    </div>
+                    <button type="submit" className="search-btn">Search</button>
+                </form>
             </div>
 
-            {/* Featured Movie Carousel */}
-            {featuredMovie && (
+            {/* Tab Navigation - hide when searching */}
+            {!isSearching && (
+                <div className="tab-nav">
+                    <button 
+                        className={`tab-btn ${activeTab === 'now_playing' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('now_playing')}
+                    >
+                        Now Playing
+                    </button>
+                    <button 
+                        className={`tab-btn ${activeTab === 'coming_soon' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('coming_soon')}
+                    >
+                        Coming Soon
+                    </button>
+                </div>
+            )}
+
+            {/* Featured Movie Carousel - hide when searching */}
+            {!isSearching && featuredMovie && (
                 <>
                     <div className="featured-section">
                         <div className="featured-movie">
@@ -146,8 +217,18 @@ function MovieList() {
             {/* Movie Grid */}
             <div className="movies-section">
                 <h2 className="section-title">
-                    {activeTab === 'now_playing' ? 'Now Playing' : 'Coming Soon'}
+                    {isSearching 
+                        ? `Search Results (${movies.length} found)`
+                        : activeTab === 'now_playing' ? 'Now Playing' : 'Coming Soon'
+                    }
                 </h2>
+
+                {isSearching && (
+                    <button className="btn-back" onClick={clearSearch} style={{ marginBottom: '20px' }}>
+                        <BsX /> Clear Search
+                    </button>
+                )}
+
                 <div className="movie-grid">
                     {movies.map((movie) => (
                         <Link 

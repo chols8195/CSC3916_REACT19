@@ -1,70 +1,204 @@
-import React, { useEffect } from 'react';
-import { fetchMovie } from '../actions/movieActions';
+import React, { useEffect, useState } from 'react';
+import { fetchMovie, submitReview } from '../actions/movieActions';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, ListGroup, ListGroupItem, Image } from 'react-bootstrap';
-import { BsStarFill } from 'react-icons/bs';
-import { useParams } from 'react-router-dom'; // Import useParams
+import { BsStarFill, BsStar, BsArrowLeft, BsPersonCircle } from 'react-icons/bs';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const MovieDetail = () => {
   const dispatch = useDispatch();
-  const { movieId } = useParams(); // Get movieId from URL parameters
+  const navigate = useNavigate();
+  const { movieId } = useParams();
   const selectedMovie = useSelector(state => state.movie.selectedMovie);
-  const loading = useSelector(state => state.movie.loading); // Assuming you have a loading state in your reducer
-  const error = useSelector(state => state.movie.error); // Assuming you have an error state in your reducer
+  const username = useSelector(state => state.auth.username);
+  const loggedIn = useSelector(state => state.auth.loggedIn);
 
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(5);
+  const [submitted, setSubmitted] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
-    dispatch(fetchMovie(movieId));
+    if (movieId) {
+      dispatch(fetchMovie(movieId));
+    }
   }, [dispatch, movieId]);
 
-  const DetailInfo = () => {
-    if (loading) {
-      return <div>Loading....</div>;
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedMovie || !username) {
+      alert('Please sign in to submit a review');
+      return;
     }
 
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
+    const reviewData = {
+      movieId: selectedMovie._id,
+      username: username,
+      review: review,
+      rating: parseInt(rating)
+    };
 
-    if (!selectedMovie) {
-      return <div>No movie data available.</div>;
-    }
+    dispatch(submitReview(reviewData));
+    setReview('');
+    setRating(5);
+    setSubmitted(true);
 
-    return (
-      <Card className="bg-dark text-dark p-4 rounded">
-        <Card.Header>Movie Detail</Card.Header>
-        <Card.Body>
-          <Image className="image" src={selectedMovie.imageUrl} thumbnail />
-        </Card.Body>
-        <ListGroup>
-          <ListGroupItem>{selectedMovie.title}</ListGroupItem>
-          <ListGroupItem>
-            {selectedMovie.actors.map((actor, i) => (
-              <p key={i}>
-                <b>{actor.actorName}</b> {actor.characterName}
-              </p>
-            ))}
-          </ListGroupItem>
-          <ListGroupItem>
-            <h4>
-              <BsStarFill /> {selectedMovie.avgRating}
-            </h4>
-          </ListGroupItem>
-        </ListGroup>
-        <Card.Body className="card-body bg-white">
-          {selectedMovie.reviews.map((review, i) => (
-            <p key={i}>
-              <b>{review.username}</b>&nbsp; {review.review} &nbsp; <BsStarFill />{' '}
-              {review.rating}
-            </p>
-          ))}
-        </Card.Body>
-      </Card>
-    );
+    setTimeout(() => {
+      dispatch(fetchMovie(movieId));
+      setSubmitted(false);
+    }, 1000);
   };
 
-  return <DetailInfo />;
-};
+  const renderStars = (count, interactive = false) => {
+    const stars = [];
+    const displayRating = interactive ? (hoverRating || rating) : count;
+    
+    for (let i = 1; i <= 5; i++) {
+      if (interactive) {
+        stars.push(
+          <button
+            key={i}
+            type="button"
+            className={`star-btn ${i <= displayRating ? 'active' : ''}`}
+            onClick={() => setRating(i)}
+            onMouseEnter={() => setHoverRating(i)}
+            onMouseLeave={() => setHoverRating(0)}
+          >
+            {i <= displayRating ? <BsStarFill /> : <BsStar />}
+          </button>
+        );
+      } else {
+        stars.push(
+          i <= count ? <BsStarFill key={i} /> : <BsStar key={i} />
+        );
+      }
+    }
+    return stars;
+  };
 
+  if (!selectedMovie) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <span>Loading movie details...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="movie-detail">
+      <button className="btn-back" onClick={() => navigate(-1)}>
+        <BsArrowLeft /> Back
+      </button>
+
+      <div className="movie-detail-header">
+        <div className="movie-detail-poster">
+          <img src={selectedMovie.imageUrl} alt={selectedMovie.title} />
+        </div>
+        
+        <div className="movie-detail-info">
+          <h1 className="movie-detail-title">{selectedMovie.title}</h1>
+          
+          <div className="movie-detail-meta">
+            <span className="meta-tag rating">
+              <BsStarFill /> {selectedMovie.avgRating ? selectedMovie.avgRating.toFixed(1) : 'N/A'}
+            </span>
+            <span className="meta-tag">{selectedMovie.releaseDate}</span>
+            <span className="meta-tag">{selectedMovie.genre}</span>
+          </div>
+
+          <p className="movie-detail-description">
+            A captivating film featuring an amazing cast and stunning visuals. 
+            Don't miss this incredible cinematic experience!
+          </p>
+
+          <button className="btn-get-tickets">
+            🎟️ Get Tickets
+          </button>
+        </div>
+      </div>
+
+      {/* Cast Section */}
+      <div className="cast-section">
+        <h2 className="section-title">Cast</h2>
+        <div className="cast-grid">
+          {selectedMovie.actors && selectedMovie.actors.map((actor, i) => (
+            <div key={i} className="cast-card">
+              <div className="cast-icon">
+                <BsPersonCircle />
+              </div>
+              <div className="cast-name">{actor.actorName}</div>
+              <div className="cast-character">{actor.characterName}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="reviews-section">
+        <div className="reviews-header">
+          <h2 className="reviews-title">
+            Reviews ({selectedMovie.reviews ? selectedMovie.reviews.length : 0})
+          </h2>
+        </div>
+
+        {/* Review Form */}
+        {loggedIn ? (
+          <form className="review-form" onSubmit={handleReviewSubmit}>
+            {submitted && (
+              <p style={{ color: '#4caf50', marginBottom: '15px' }}>
+                ✓ Review submitted successfully!
+              </p>
+            )}
+            <textarea
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder="Share your thoughts about this movie..."
+              required
+            />
+            <div className="review-form-footer">
+              <div className="rating-select">
+                {renderStars(rating, true)}
+              </div>
+              <button type="submit" className="btn-submit-review">
+                Submit Review
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="review-form" style={{ textAlign: 'center', padding: '30px' }}>
+            <p style={{ color: '#888', marginBottom: '15px' }}>
+              Sign in to write a review
+            </p>
+            <button 
+              className="btn-submit-review"
+              onClick={() => navigate('/signin')}
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+
+        {/* Review List */}
+        {selectedMovie.reviews && selectedMovie.reviews.length > 0 ? (
+          selectedMovie.reviews.map((rev, i) => (
+            <div key={i} className="review-item">
+              <div className="review-header">
+                <span className="review-user">{rev.username}</span>
+                <span className="review-rating">
+                  <BsStarFill /> {rev.rating}
+                </span>
+              </div>
+              <p className="review-text">{rev.review}</p>
+            </div>
+          ))
+        ) : (
+          <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>
+            No reviews yet. Be the first to review!
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default MovieDetail;

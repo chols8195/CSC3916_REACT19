@@ -1,54 +1,100 @@
 import React, { useState } from 'react';
 import { submitRegister } from '../actions/authActions';
 import { useDispatch } from 'react-redux';
-import { Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
-    const [details, setDetails] = useState({
-        name: '',
-        username: '',
-        email: '',
-        password: ''
+  const [details, setDetails] = useState({
+    name: '',
+    username: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const updateDetails = (event) => {
+    setDetails({
+      ...details,
+      [event.target.id]: event.target.value
     });
+  };
 
-    const dispatch = useDispatch();
+  const register = async (event) => {
+    event.preventDefault();
+    setError('');
+    
+    try {
+      await dispatch(submitRegister(details));
+      navigate('/movielist');
+    } catch (e) {
+      setError('Registration failed. Please try again.');
+    }
+  };
 
-    const updateDetails = (event) => {
-        setDetails({
-          ...details,
-            [event.target.id]: event.target.value
-        });
-    };
+  return (
+    <form onSubmit={register}>
+      {error && (
+        <p style={{ color: '#e50914', marginBottom: '15px', textAlign: 'center' }}>
+          {error}
+        </p>
+      )}
 
-    const register = () => {
-        dispatch(submitRegister(details));
-    };
+      <div className="form-group">
+        <label htmlFor="name">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          placeholder="Enter your name"
+          value={details.name}
+          onChange={updateDetails}
+          required
+        />
+      </div>
 
-    return (
-        <div className="register-container">
-            <Form className='register-form bg-dark text-light p-4 rounded'>
-                <Form.Group controlId="name" className='mb-3'>
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control onChange={updateDetails} value={details.name} type="text" placeholder="Name" />
-                </Form.Group>
+      <div className="form-group">
+        <label htmlFor="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Choose a username"
+          value={details.username}
+          onChange={updateDetails}
+          required
+        />
+      </div>
 
-                <Form.Group controlId="username" className='mb-3'>
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control onChange={updateDetails} value={details.username} autoComplete="username" type="text" placeholder="Enter username" />
-                </Form.Group>
+      <div className="form-group">
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Enter your email"
+          value={details.email}
+          onChange={updateDetails}
+          required
+        />
+      </div>
 
-                <Form.Group controlId="email" className='mb-3'>
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control onChange={updateDetails} value={details.email} autoComplete="email" type="email" placeholder="Enter email" />
-                </Form.Group>
-                <Form.Group controlId="password" className='mb-3'>
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control onChange={updateDetails} value={details.password} autoComplete="current-password" type="password" placeholder="Password" />
-                </Form.Group>
-                <Button onClick={register}>Register</Button>
-            </Form>
-        </div>
-    );
+      <div className="form-group">
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Create a password"
+          value={details.password}
+          onChange={updateDetails}
+          required
+        />
+      </div>
+
+      <button type="submit" className="btn-auth">
+        Create Account
+      </button>
+    </form>
+  );
 }
 
 export default Register;

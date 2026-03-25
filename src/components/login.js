@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { submitLogin } from '../actions/authActions';
 import { useDispatch } from 'react-redux';
-import { Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [details, setDetails] = useState({
     username: '',
     password: '',
   });
+  const [error, setError] = useState('');
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const updateDetails = (event) => {
     setDetails({
@@ -18,38 +20,54 @@ function Login() {
     });
   };
 
-  const login = (event) => {
-    event.preventDefault(); // Prevent form from refreshing the page
-    dispatch(submitLogin(details));
+  const login = async (event) => {
+    event.preventDefault();
+    setError('');
+    
+    try {
+      await dispatch(submitLogin(details));
+      navigate('/movielist');
+    } catch (e) {
+      setError('Invalid username or password');
+    }
   };
 
   return (
-    <div className="login-container">
-        <Form onSubmit={login} className='login-form bg-dark text-light p-4 rounded'> {/* Use onSubmit for the form */}
-        <Form.Group controlId="username" className="mb-3">
-            <Form.Label>Username or Email</Form.Label>
-            <Form.Control
-            type="text"
-            placeholder="Enter username or email"
-            autoComplete="username"
-            value={details.username}
-            onChange={updateDetails}
-            />
-        </Form.Group>
+    <form onSubmit={login}>
+      {error && (
+        <p style={{ color: '#e50914', marginBottom: '15px', textAlign: 'center' }}>
+          {error}
+        </p>
+      )}
+      
+      <div className="form-group">
+        <label htmlFor="username">Username or Email</label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter username or email"
+          value={details.username}
+          onChange={updateDetails}
+          required
+        />
+      </div>
 
-        <Form.Group controlId="password" className="mb-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-            type="password"
-            placeholder="Password"
-            autoComplete="current-password"
-            value={details.password}
-            onChange={updateDetails}
-            />
-        </Form.Group>
-        <Button type="submit">Sign in</Button> {/* Use type="submit" */}
-        </Form>
-    </div>
+      <div className="form-group">
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter password"
+          value={details.password}
+          onChange={updateDetails}
+          required
+        />
+      </div>
+
+      <button type="submit" className="btn-auth">
+        Sign In
+      </button>
+    </form>
   );
 }
 

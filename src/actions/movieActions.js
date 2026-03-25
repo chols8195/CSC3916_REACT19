@@ -1,5 +1,5 @@
 import actionTypes from '../constants/actionTypes';
-//import runtimeEnv from '@mars/heroku-js-runtime-env'
+
 const env = process.env;
 
 function moviesFetched(movies) {
@@ -23,9 +23,41 @@ function movieSet(movie) {
     }
 }
 
+function reviewPosted(review) {
+    return {
+        type: actionTypes.POST_REVIEW,
+        review: review
+    }
+}
+
 export function setMovie(movie) {
     return dispatch => {
         dispatch(movieSet(movie));
+    }
+}
+
+export function fetchMovies(status = null) {
+    return dispatch => {
+        let url = `${env.REACT_APP_API_URL}/movies?reviews=true`;
+        if (status) {
+            url += `&status=${status}`;
+        }
+        
+        return fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors'
+        }).then((response) => {
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            return response.json();
+        }).then((res) => {
+            dispatch(moviesFetched(res.movies));
+        }).catch((e) => console.log(e));
     }
 }
 
@@ -35,38 +67,38 @@ export function fetchMovie(movieId) {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Content-Type': 'application/json'
             },
             mode: 'cors'
         }).then((response) => {
             if (!response.ok) {
                 throw Error(response.statusText);
             }
-            return response.json()
+            return response.json();
         }).then((res) => {
-            dispatch(movieFetched(res));
+            dispatch(movieFetched(res.movie));
         }).catch((e) => console.log(e));
     }
 }
 
-export function fetchMovies() {
+export function submitReview(reviewData) {
     return dispatch => {
-        return fetch(`${env.REACT_APP_API_URL}/movies?reviews=true`, {
-            method: 'GET',
+        return fetch(`${env.REACT_APP_API_URL}/reviews`, {
+            method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('token')
             },
+            body: JSON.stringify(reviewData),
             mode: 'cors'
         }).then((response) => {
             if (!response.ok) {
                 throw Error(response.statusText);
             }
-            return response.json()
+            return response.json();
         }).then((res) => {
-            dispatch(moviesFetched(res));
+            dispatch(reviewPosted(res));
         }).catch((e) => console.log(e));
     }
 }

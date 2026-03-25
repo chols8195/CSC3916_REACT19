@@ -1,45 +1,47 @@
 import React from 'react';
-import { Navbar, Nav } from 'react-bootstrap';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from "../actions/authActions";
+import { BsFilm, BsPersonCircle } from 'react-icons/bs';
 
 function MovieHeader() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const loggedIn = useSelector((state) => state.auth.loggedIn);
     const username = useSelector((state) => state.auth.username);
-    const selectedMovie = useSelector((state) => state.movie.selectedMovie);
     
     const logout = () => {
         dispatch(logoutUser());
+        navigate('/');
     };
 
     return (
-        <div>
-            <Navbar expand="lg" bg="dark" variant="dark">
-                <Navbar.Brand as={NavLink} to="/">Movie App</Navbar.Brand> 
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="ml-auto">
-                    <Nav.Link as={NavLink} to="/movielist" disabled={!loggedIn}> 
-                        Movie List
-                    </Nav.Link>
-                    <Nav.Link as={NavLink} to={'/movie/' + (selectedMovie? selectedMovie._id: '')} disabled={!loggedIn}>
-                        Movie Detail
-                    </Nav.Link>
-                    <Nav.Link as={NavLink} to="/signin"> 
-                        {loggedIn? (
-                        <span onClick={logout} style={{ cursor: 'pointer' }}>
-                            Logout
+        <header className="cinema-header">
+            <NavLink to="/" className="cinema-logo">
+                <BsFilm /> CinemaSeats
+            </NavLink>
+            
+            <div className="nav-buttons">
+                <NavLink to="/movielist">
+                    <button className="nav-btn">Now Playing</button>
+                </NavLink>
+                
+                {loggedIn ? (
+                    <>
+                        <span style={{ color: '#888' }}>
+                            <BsPersonCircle /> {username}
                         </span>
-                        ): (
-                        'Login'
-                        )}
-                    </Nav.Link>
-                </Nav>
-                </Navbar.Collapse>
-            </Navbar>
-        </div>
+                        <button className="nav-btn" onClick={logout}>
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <NavLink to="/signin">
+                        <button className="nav-btn filled">Sign In</button>
+                    </NavLink>
+                )}
+            </div>
+        </header>
     );
 }
 

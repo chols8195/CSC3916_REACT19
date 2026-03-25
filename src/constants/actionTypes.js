@@ -1,9 +1,9 @@
-const Constants = {
-    USER_LOGGEDIN: 'USER_LOGGEDIN',
-    USER_LOGOUT: 'USER_LOGOUT',
+export default {
+    SET_MOVIES: 'SET_MOVIES',
     FETCH_MOVIES: 'FETCH_MOVIES',
+    SET_MOVIE: 'SET_MOVIE',
     FETCH_MOVIE: 'FETCH_MOVIE',
-    SET_MOVIE: 'SET_MOVIE'
+    POST_REVIEW: 'POST_REVIEW',
+    USER_LOGGEDIN: 'USER_LOGGEDIN',
+    USER_LOGOUT: 'USER_LOGOUT'
 }
-
-export default Constants;

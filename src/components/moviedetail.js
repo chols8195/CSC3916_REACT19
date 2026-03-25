@@ -24,29 +24,29 @@ const MovieDetail = () => {
   }, [dispatch, movieId]);
 
   const handleReviewSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedMovie || !username) {
-      alert('Please sign in to submit a review');
-      return;
-    }
+      e.preventDefault();
+      if (!selectedMovie || !loggedIn) {
+        alert('Please sign in to submit a review');
+        return;
+      }
 
-    const reviewData = {
-      movieId: selectedMovie._id,
-      username: username,
-      review: review,
-      rating: parseInt(rating)
+      const reviewData = {
+        movieId: selectedMovie._id,
+        review: review,
+        rating: parseInt(rating)
+        // username is now retrieved from JWT on server side
+      };
+
+      dispatch(submitReview(reviewData));
+      setReview('');
+      setRating(5);
+      setSubmitted(true);
+
+      setTimeout(() => {
+        dispatch(fetchMovie(movieId));
+        setSubmitted(false);
+      }, 1000);
     };
-
-    dispatch(submitReview(reviewData));
-    setReview('');
-    setRating(5);
-    setSubmitted(true);
-
-    setTimeout(() => {
-      dispatch(fetchMovie(movieId));
-      setSubmitted(false);
-    }, 1000);
-  };
 
   const renderStars = (count, interactive = false) => {
     const stars = [];

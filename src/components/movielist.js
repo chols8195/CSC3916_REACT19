@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMovies, setMovie } from "../actions/movieActions";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BsStarFill, BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 
 function MovieList() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const movies = useSelector(state => state.movie.movies);
+    const loggedIn = useSelector(state => state.auth.loggedIn);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('now_playing');
 
     useEffect(() => {
-        dispatch(fetchMovies(activeTab));
-    }, [dispatch, activeTab]);
+        if (loggedIn) {
+            dispatch(fetchMovies(activeTab));
+        }
+    }, [dispatch, activeTab, loggedIn]);
 
     useEffect(() => {
         if (movies && movies.length > 0) {
@@ -44,6 +48,26 @@ function MovieList() {
             setFeaturedIndex((prev) => (prev - 1 + Math.min(movies.length, 5)) % Math.min(movies.length, 5));
         }
     };
+
+    // If not logged in, show login prompt
+    if (!loggedIn) {
+        return (
+            <div className="auth-page">
+                <div className="auth-container" style={{ textAlign: 'center' }}>
+                    <h2 style={{ marginBottom: '20px' }}>Welcome to Cinema Seats</h2>
+                    <p style={{ color: '#888', marginBottom: '30px' }}>
+                        Please sign in to view movies and submit reviews.
+                    </p>
+                    <button 
+                        className="btn-auth" 
+                        onClick={() => navigate('/signin')}
+                    >
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (!movies || movies.length === 0) {
         return (

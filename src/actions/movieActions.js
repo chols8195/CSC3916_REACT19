@@ -42,12 +42,13 @@ export function fetchMovies(status = null) {
         if (status) {
             url += `&status=${status}`;
         }
-        
+
         return fetch(url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             mode: 'cors'
         }).then((response) => {
@@ -67,7 +68,8 @@ export function fetchMovie(movieId) {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             mode: 'cors'
         }).then((response) => {

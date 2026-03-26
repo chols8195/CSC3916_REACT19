@@ -1,5 +1,5 @@
 import actionTypes from '../constants/actionTypes';
-//import runtimeEnv from '@mars/heroku-js-runtime-env'
+
 const env = process.env;
 
 function userLoggedIn(username) {
@@ -9,13 +9,21 @@ function userLoggedIn(username) {
     }
 }
 
-function logout() {
+function userLogout() {
     return {
         type: actionTypes.USER_LOGOUT
     }
 }
 
-export function submitLogin(data) {
+export function logout() {
+    return dispatch => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        dispatch(userLogout());
+    }
+}
+
+export function login(credentials) {
     return dispatch => {
         return fetch(`${env.REACT_APP_API_URL}/signin`, {
             method: 'POST',
@@ -23,23 +31,25 @@ export function submitLogin(data) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(credentials),
             mode: 'cors'
         }).then((response) => {
             if (!response.ok) {
                 throw Error(response.statusText);
             }
-            return response.json()
+            return response.json();
         }).then((res) => {
-            localStorage.setItem('username', data.username);
-            localStorage.setItem('token', res.token);
-
-            dispatch(userLoggedIn(data.username));
+            if (res.success) {
+                localStorage.setItem('token', res.token);
+                localStorage.setItem('username', credentials.username);
+                dispatch(userLoggedIn(credentials.username));
+            }
+            return res;
         }).catch((e) => console.log(e));
     }
 }
 
-export function submitRegister(data) {
+export function register(userData) {
     return dispatch => {
         return fetch(`${env.REACT_APP_API_URL}/signup`, {
             method: 'POST',
@@ -47,23 +57,24 @@ export function submitRegister(data) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(userData),
             mode: 'cors'
         }).then((response) => {
             if (!response.ok) {
                 throw Error(response.statusText);
             }
-            return response.json()
-        }).then((res) => {
-            dispatch(submitLogin(data));
+            return response.json();
         }).catch((e) => console.log(e));
     }
 }
 
-export function logoutUser() {
+// Check if user is already logged in (on page refresh)
+export function checkAuth() {
     return dispatch => {
-        localStorage.removeItem('username');
-        localStorage.removeItem('token');
-        dispatch(logout())
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+        if (token && username) {
+            dispatch(userLoggedIn(username));
+        }
     }
 }

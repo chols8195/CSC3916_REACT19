@@ -1,74 +1,66 @@
 import React, { useState } from 'react';
-import { submitLogin } from '../actions/authActions';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../actions/authActions';
 
 function Login() {
-  const [details, setDetails] = useState({
-    username: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
 
-  const updateDetails = (event) => {
-    setDetails({
-      ...details,
-      [event.target.id]: event.target.value,
-    });
-  };
+        if (!username || !password) {
+            setError('Please enter username and password');
+            return;
+        }
 
-  const login = async (event) => {
-    event.preventDefault();
-    setError('');
-    
-    try {
-      await dispatch(submitLogin(details));
-      navigate('/movielist');
-    } catch (e) {
-      setError('Invalid username or password');
-    }
-  };
+        dispatch(login({ username, password }))
+            .then((res) => {
+                if (res && res.success) {
+                    navigate('/movielist');
+                } else {
+                    setError('Invalid username or password');
+                }
+            })
+            .catch(() => {
+                setError('Login failed. Please try again.');
+            });
+    };
 
-  return (
-    <form onSubmit={login}>
-      {error && (
-        <p style={{ color: '#e50914', marginBottom: '15px', textAlign: 'center' }}>
-          {error}
-        </p>
-      )}
-      
-      <div className="form-group">
-        <label htmlFor="username">Username or Email</label>
-        <input
-          type="text"
-          id="username"
-          placeholder="Enter username or email"
-          value={details.username}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+    return (
+        <form onSubmit={handleSubmit}>
+            {error && <div style={{ color: '#ff6b6b', marginBottom: '15px', textAlign: 'center' }}>{error}</div>}
+            
+            <div className="form-group">
+                <label>Username</label>
+                <input
+                    type="text"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+            </div>
 
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter password"
-          value={details.password}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+            <div className="form-group">
+                <label>Password</label>
+                <input
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
 
-      <button type="submit" className="btn-auth">
-        Sign In
-      </button>
-    </form>
-  );
+            <button type="submit" className="btn-auth">
+                Sign In
+            </button>
+        </form>
+    );
 }
 
 export default Login;

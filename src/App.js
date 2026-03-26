@@ -1,9 +1,13 @@
+import React from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import MovieHeader from './components/movieheader';
 import MovieList from './components/movielist';
 import Movie from './components/movie';
 import Authentication from './components/authentication';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import MyTickets from './components/mytickets';
+import Watchlist from './components/watchlist';
+import Settings from './components/settings';
 
 function App() {
   return (
@@ -15,6 +19,9 @@ function App() {
           <Route path="/movielist" element={<MovieList />} />
           <Route path="/movie/:movieId" element={<Movie />} />
           <Route path="/signin" element={<Authentication />} />
+          <Route path="/tickets" element={<MyTickets />} />
+          <Route path="/watchlist" element={<Watchlist />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
     </HashRouter>

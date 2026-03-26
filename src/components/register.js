@@ -1,100 +1,103 @@
 import React, { useState } from 'react';
-import { submitRegister } from '../actions/authActions';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { register } from '../actions/authActions';
 
 function Register() {
-  const [details, setDetails] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
+    const dispatch = useDispatch();
+    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const [isError, setIsError] = useState(false);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setMessage('');
 
-  const updateDetails = (event) => {
-    setDetails({
-      ...details,
-      [event.target.id]: event.target.value
-    });
-  };
+        if (!name || !username || !email || !password) {
+            setMessage('Please fill in all fields');
+            setIsError(true);
+            return;
+        }
 
-  const register = async (event) => {
-    event.preventDefault();
-    setError('');
-    
-    try {
-      await dispatch(submitRegister(details));
-      navigate('/movielist');
-    } catch (e) {
-      setError('Registration failed. Please try again.');
-    }
-  };
+        dispatch(register({ name, username, email, password }))
+            .then((res) => {
+                if (res && res.success) {
+                    setMessage('Account created! Please sign in.');
+                    setIsError(false);
+                    setName('');
+                    setUsername('');
+                    setEmail('');
+                    setPassword('');
+                } else {
+                    setMessage(res?.message || 'Registration failed');
+                    setIsError(true);
+                }
+            })
+            .catch(() => {
+                setMessage('Registration failed. Please try again.');
+                setIsError(true);
+            });
+    };
 
-  return (
-    <form onSubmit={register}>
-      {error && (
-        <p style={{ color: '#e50914', marginBottom: '15px', textAlign: 'center' }}>
-          {error}
-        </p>
-      )}
+    return (
+        <form onSubmit={handleSubmit}>
+            {message && (
+                <div style={{ 
+                    color: isError ? '#ff6b6b' : '#4dabf7', 
+                    marginBottom: '15px', 
+                    textAlign: 'center' 
+                }}>
+                    {message}
+                </div>
+            )}
 
-      <div className="form-group">
-        <label htmlFor="name">Full Name</label>
-        <input
-          type="text"
-          id="name"
-          placeholder="Enter your name"
-          value={details.name}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+            <div className="form-group">
+                <label>Name</label>
+                <input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+            </div>
 
-      <div className="form-group">
-        <label htmlFor="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          placeholder="Choose a username"
-          value={details.username}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+            <div className="form-group">
+                <label>Username</label>
+                <input
+                    type="text"
+                    placeholder="Choose a username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+            </div>
 
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          value={details.email}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+            <div className="form-group">
+                <label>Email</label>
+                <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
 
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Create a password"
-          value={details.password}
-          onChange={updateDetails}
-          required
-        />
-      </div>
+            <div className="form-group">
+                <label>Password</label>
+                <input
+                    type="password"
+                    placeholder="Create a password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
 
-      <button type="submit" className="btn-auth">
-        Create Account
-      </button>
-    </form>
-  );
+            <button type="submit" className="btn-auth">
+                Create Account
+            </button>
+        </form>
+    );
 }
 
 export default Register;

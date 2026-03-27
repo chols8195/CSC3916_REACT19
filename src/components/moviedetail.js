@@ -111,8 +111,11 @@ const MovieDetail = () => {
             Don't miss this incredible cinematic experience!
           </p>
 
-          <button className="btn-get-tickets">
-            Get Tickets
+          <button 
+              className="btn-get-tickets"
+              onClick={() => alert(`Tickets for "${selectedMovie.title}" - Coming Soon! This feature is under development.`)}
+          >
+              Get Tickets
           </button>
         </div>
       </div>

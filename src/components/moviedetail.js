@@ -112,7 +112,7 @@ const MovieDetail = () => {
           </p>
 
           <button className="btn-get-tickets">
-            🎟️ Get Tickets
+            Get Tickets
           </button>
         </div>
       </div>

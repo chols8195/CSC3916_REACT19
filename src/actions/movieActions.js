@@ -64,6 +64,9 @@ export function fetchMovies(status = null) {
 
 export function fetchMovie(movieId) {
     return dispatch => {
+        console.log('fetchMovie called with ID:', movieId);
+        console.log('Token:', localStorage.getItem('token'));
+        
         return fetch(`${env.REACT_APP_API_URL}/movies/${movieId}?reviews=true`, {
             method: 'GET',
             headers: {
@@ -73,13 +76,21 @@ export function fetchMovie(movieId) {
             },
             mode: 'cors'
         }).then((response) => {
+            console.log('fetchMovie response status:', response.status);
             if (!response.ok) {
                 throw Error(response.statusText);
             }
             return response.json();
         }).then((res) => {
-            dispatch(movieFetched(res.movie));
-        }).catch((e) => console.log(e));
+            console.log('fetchMovie response data:', res);
+            if (res.movie) {
+                dispatch(movieFetched(res.movie));
+            } else {
+                console.log('No movie in response');
+            }
+        }).catch((e) => {
+            console.log('fetchMovie error:', e);
+        });
     }
 }
 

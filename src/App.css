@@ -14,17 +14,19 @@ body {
 .App {
   min-height: 100vh;
   background: #0d0d0d;
+  position: relative;
 }
 
 /* Header / Navbar */
 .cinema-header {
   background: #1a1a1a;
-  padding: 15px 30px;
+  padding: 15px 40px 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #333;
   position: relative;
+  z-index: 1000;
 }
 
 .cinema-logo {
@@ -97,6 +99,7 @@ body {
 /* User Menu Dropdown */
 .user-menu {
   position: relative;
+  z-index: 1001;
 }
 
 .user-btn {
@@ -141,24 +144,24 @@ body {
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);
-  right: 0;
+  left: auto;
+  right: auto;
+  transform: translateX(-800px) translateY(-10px);
   background: #252525;
   border: 1px solid #333;
   border-radius: 12px;
-  min-width: 220px;
+  width: 220px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   z-index: 9999;
-  overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
 }
 
 .dropdown-menu.show {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-60px) translateY(0);
 }
 
 .dropdown-header {
@@ -1661,10 +1664,6 @@ body {
 
   .movie-card img {
     height: 200px;
-  }
-
-  .cinema-header {
-    padding: 12px 15px;
   }
 
   .cinema-logo {

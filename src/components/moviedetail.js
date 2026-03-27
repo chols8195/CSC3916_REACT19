@@ -113,7 +113,7 @@ const MovieDetail = () => {
 
           <button 
               className="btn-get-tickets"
-              onClick={() => alert(`Tickets for "${selectedMovie.title}" - Coming Soon! This feature is under development.`)}
+              onClick={() => navigate('/tickets')}
           >
               Get Tickets
           </button>
